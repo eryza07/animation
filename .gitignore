@@ -1,0 +1,14 @@
+# Logs & Cache
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+
+# Automation State & Credentials
+automation/state.json
+automation/.env
+automation/config.json
+
+# Local IDE configs
+.vscode/
+.idea/

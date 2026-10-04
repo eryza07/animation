@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="id" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Idea Bank & Upvotes - Community Animation Hub</title>
+  <meta name="description" content="Kumpulkan ide cerita animasi, berikan voting suara, dan ikuti tantangan animasi mingguan & bulanan komunitas.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="../src/css/custom.css">
+
+  <!-- Supabase JS Client via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-[#090d16] text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Ambient Glow Backgrounds -->
+  <div class="fixed top-0 right-1/4 w-96 h-96 bg-indigo-600/10 glow-primary -z-10"></div>
+  <div class="fixed bottom-1/4 left-10 w-96 h-96 bg-purple-600/10 glow-primary -z-10"></div>
+
+  <!-- NAVIGATION BAR -->
+  <header class="sticky top-0 z-50 glass-panel border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="../index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 p-0.5 shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+            <svg class="w-5 h-5 text-indigo-400 group-hover:text-indigo-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </div>
+        </div>
+        <div>
+          <span class="font-heading font-extrabold text-lg tracking-tight text-white group-hover:text-indigo-300 transition-colors">AnimHub<span class="text-indigo-400">.</span></span>
+          <span class="hidden sm:inline-block text-[10px] uppercase tracking-wider px-2 py-0.5 ml-2 bg-indigo-500/10 text-indigo-300 rounded-full border border-indigo-500/20 font-semibold">Community Studio</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav class="hidden md:flex items-center gap-1 text-sm font-medium text-slate-300">
+        <a href="../index.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Beranda</a>
+        <a href="ideas.html" class="px-3.5 py-1.5 rounded-lg text-white bg-slate-800/80 transition-colors">Idea Bank</a>
+        <a href="projects.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Pipeline</a>
+        <a href="collab.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Kolaborasi</a>
+        <a href="assets.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Katalog Aset</a>
+        <a href="gallery.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Galeri</a>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3">
+        <a href="#drop-box" class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-xs font-semibold shadow-md shadow-indigo-500/25 transition-all duration-200 hover:scale-105 active:scale-95">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          <span>Drop Ide Cerita</span>
+        </a>
+
+        <!-- Mobile Menu Button -->
+        <button id="btn-mobile-menu" class="md:hidden p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white focus:outline-none" aria-label="Buka Menu">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800/80 bg-slate-950/95 backdrop-blur-xl px-4 py-4 space-y-2">
+      <a href="../index.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Beranda</a>
+      <a href="ideas.html" class="block px-3 py-2 rounded-lg text-white font-medium bg-slate-800/60">Idea Bank & Upvotes</a>
+      <a href="projects.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Pipeline Tracker</a>
+      <a href="collab.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Open Collab Board</a>
+      <a href="assets.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Katalog Aset</a>
+      <a href="gallery.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Galeri Rilis</a>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+    <!-- HEADER TITLE & INTRO -->
+    <section class="space-y-3">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-semibold">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        <span>Modul 1: Brainstorming & Voting Komunitas</span>
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-extrabold font-heading text-white tracking-tight">
+        Idea Bank & Upvotes
+      </h1>
+      <p class="text-sm sm:text-base text-slate-400 max-w-2xl leading-relaxed">
+        Punya ide cerita animasi menarik? Masukkan ke Idea Drop-Box tanpa perlu login. Member komunitas akan memberikan upvote pada ide yang paling layak diproduksi bersama!
+      </p>
+    </section>
+
+    <!-- CHALLENGE BOARD BANNER SECTION -->
+    <section id="challenge-board-section">
+      <!-- Rendered by challenges.js -->
+      <div class="glass-card p-8 rounded-3xl skeleton h-44"></div>
+    </section>
+
+    <!-- IDEA DROP-BOX FORM SECTION -->
+    <section id="drop-box" class="scroll-mt-24">
+      <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-indigo-500/20 shadow-2xl relative overflow-hidden">
+        <!-- Accent Glow -->
+        <div class="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-3xl space-y-6">
+          <div class="space-y-1">
+            <h2 class="text-2xl font-bold font-heading text-white flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-400 text-sm">✍️</span>
+              Idea Drop-Box: Ajukan Ide Baru
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-400">
+              Formulir terhubung langsung ke Google Sheets master via Apps Script. Ide yang disetujui akan langsung muncul di daftar voting.
+            </p>
+          </div>
+
+          <form id="form-idea-drop" class="space-y-4">
+            <!-- Anti-spam Honeypot (hidden from human users) -->
+            <input type="text" id="idea-hp" name="_hp" class="hidden" tabindex="-1" autocomplete="off" />
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Judul Ide -->
+              <div class="space-y-1.5 sm:col-span-2">
+                <label for="idea-title" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  Judul Ide Cerita <span class="text-rose-400">*</span>
+                </label>
+                <input type="text" id="idea-title" required placeholder="Contoh: Pendekar Cybernetic Lawan Robot Raksasa" 
+                       class="w-full px-4 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-sm text-white placeholder-slate-500 outline-none transition-all" />
+              </div>
+
+              <!-- Kategori -->
+              <div class="space-y-1.5">
+                <label for="idea-category" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  Kategori Proyek <span class="text-rose-400">*</span>
+                </label>
+                <select id="idea-category" required class="w-full px-4 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-sm text-white outline-none transition-all">
+                  <option value="Short Film">Short Film (Animasi Pendek)</option>
+                  <option value="Series">Series / Serial Animasi</option>
+                  <option value="Meme/Parody">Meme / Parodi Komedi</option>
+                  <option value="Technical Test">Technical Test (Rig/Action Test)</option>
+                  <option value="Challenge Submission">Challenge Submission (Tantangan)</option>
+                  <option value="General">General / Lainnya</option>
+                </select>
+              </div>
+
+              <!-- Nama Pengaju -->
+              <div class="space-y-1.5">
+                <label for="idea-author" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  Nama Anda / Studio
+                </label>
+                <input type="text" id="idea-author" placeholder="Contoh: Rian Animator (atau kosongkan untuk anonim)" 
+                       class="w-full px-4 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-sm text-white placeholder-slate-500 outline-none transition-all" />
+              </div>
+
+              <!-- Deskripsi Cerita / Sinopsis -->
+              <div class="space-y-1.5 sm:col-span-2">
+                <label for="idea-desc" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  Sinopsis / Konsep Cerita <span class="text-rose-400">*</span>
+                </label>
+                <textarea id="idea-desc" rows="3" required placeholder="Jelaskan premis cerita, karakter utama, atau daya tarik visual animasi yang ingin dibuat..." 
+                          class="w-full px-4 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-sm text-white placeholder-slate-500 outline-none transition-all"></textarea>
+              </div>
+            </div>
+
+            <div class="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <p class="text-xs text-slate-400 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Tersimpan aman di Google Sheets & siap divoting seketika
+              </p>
+
+              <button type="submit" id="btn-submit-idea" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/30 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                <span>Kirim Ide Sekarang</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- IDEAS LIST & FILTER SECTION -->
+    <section id="ideas-section" class="space-y-6 scroll-mt-20">
+      
+      <!-- Section Title & Meta -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800/80">
+        <div>
+          <h2 class="text-2xl font-bold font-heading text-white flex items-center gap-3">
+            Daftar Ide Komunitas
+            <span id="ideas-count-badge" class="px-2.5 py-0.5 rounded-full bg-slate-800 text-indigo-400 text-xs font-mono font-semibold">
+              Memuat...
+            </span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400">
+            Dukung ide favorit Anda dengan 1-klik vote. Ide terpopuler akan masuk ke pipeline proyek komunitas!
+          </p>
+        </div>
+
+        <!-- Sorting Dropdown -->
+        <div class="flex items-center gap-2 self-start sm:self-auto">
+          <label for="sort-ideas" class="text-xs text-slate-400 shrink-0 font-medium">Urutkan:</label>
+          <select id="sort-ideas" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-medium text-slate-200 outline-none focus:border-indigo-500">
+            <option value="most-votes">Paling Populer (Most Upvotes)</option>
+            <option value="newest">Ide Terbaru</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Filter Chips & Search Bar -->
+      <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+        
+        <!-- Category Filter Buttons -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-none text-xs font-medium">
+          <button data-category="all" class="btn-category-filter px-4 py-2 rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/30 whitespace-nowrap transition-all">
+            Semua Kategori
+          </button>
+          <button data-category="Short Film" class="btn-category-filter px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 whitespace-nowrap transition-all">
+            Short Film
+          </button>
+          <button data-category="Series" class="btn-category-filter px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 whitespace-nowrap transition-all">
+            Series
+          </button>
+          <button data-category="Meme/Parody" class="btn-category-filter px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 whitespace-nowrap transition-all">
+            Meme & Parodi
+          </button>
+          <button data-category="Technical Test" class="btn-category-filter px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 whitespace-nowrap transition-all">
+            Technical Test
+          </button>
+          <button data-category="Challenge Submission" class="btn-category-filter px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 whitespace-nowrap transition-all">
+            Tantangan
+          </button>
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative w-full lg:w-72 shrink-0">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+          <input type="text" id="search-ideas" placeholder="Cari judul, cerita, atau author..." 
+                 class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-700/80 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-xs text-white placeholder-slate-500 outline-none transition-all" />
+        </div>
+
+      </div>
+
+      <!-- IDEAS GRID CONTAINER -->
+      <div id="ideas-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Dynamically rendered by ideas.js -->
+        <div class="glass-card p-6 rounded-2xl skeleton h-52"></div>
+        <div class="glass-card p-6 rounded-2xl skeleton h-52"></div>
+        <div class="glass-card p-6 rounded-2xl skeleton h-52"></div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- UNIVERSAL FOOTER -->
+  <footer class="border-t border-slate-800/80 bg-slate-950 py-10 mt-16 text-slate-400 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        <span class="font-heading font-bold text-white text-sm">Community Animation Hub</span> &copy; 2026. Modul Idea Bank & Upvotes.
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="../index.html" class="hover:text-white transition-colors">Beranda</a>
+        <a href="projects.html" class="hover:text-white transition-colors">Pipeline</a>
+        <a href="collab.html" class="hover:text-white transition-colors">Kolaborasi</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Container Placeholder -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-[9999] flex flex-col gap-2.5 pointer-events-none max-w-sm w-full px-4"></div>
+
+  <!-- Page Controller Script -->
+  <script type="module">
+    import { initChallenges } from '../src/js/modules/challenges.js';
+    import { initIdeasPage } from '../src/js/modules/ideas.js';
+    import { $ } from '../src/js/utils/dom.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Mobile menu toggle
+      const btn = $('#btn-mobile-menu');
+      const menu = $('#mobile-menu');
+      if (btn && menu) {
+        btn.addEventListener('click', () => menu.classList.toggle('hidden'));
+      }
+
+      // Initialize modules
+      initChallenges();
+      initIdeasPage();
+    });
+  </script>
+</body>
+</html>

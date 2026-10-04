@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="id" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detail Proyek & Hub Kolaborasi - Community Animation Hub</title>
+  <meta name="description" content="Checklist scene realtime, Relay Render PC spek tinggi, Asset Handoff Google Drive, dan Timestamp Feedback revisi video.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="../src/css/custom.css">
+
+  <!-- Supabase JS Client via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-[#090d16] text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Ambient Glow Backgrounds -->
+  <div class="fixed top-0 left-1/4 w-96 h-96 bg-indigo-600/10 glow-primary -z-10"></div>
+  <div class="fixed bottom-10 right-10 w-96 h-96 bg-purple-600/10 glow-primary -z-10"></div>
+
+  <!-- NAVIGATION BAR -->
+  <header class="sticky top-0 z-50 glass-panel border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="../index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 p-0.5 shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+            <svg class="w-5 h-5 text-indigo-400 group-hover:text-indigo-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </div>
+        </div>
+        <div>
+          <span class="font-heading font-extrabold text-lg tracking-tight text-white group-hover:text-indigo-300 transition-colors">AnimHub<span class="text-indigo-400">.</span></span>
+          <span class="hidden sm:inline-block text-[10px] uppercase tracking-wider px-2 py-0.5 ml-2 bg-indigo-500/10 text-indigo-300 rounded-full border border-indigo-500/20 font-semibold">Community Studio</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav class="hidden md:flex items-center gap-1 text-sm font-medium text-slate-300">
+        <a href="../index.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Beranda</a>
+        <a href="ideas.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Idea Bank</a>
+        <a href="projects.html" class="px-3.5 py-1.5 rounded-lg text-white bg-slate-800/80 transition-colors">Pipeline</a>
+        <a href="collab.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Kolaborasi</a>
+        <a href="assets.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Katalog Aset</a>
+        <a href="gallery.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Galeri</a>
+      </nav>
+
+      <!-- Action Button -->
+      <div class="flex items-center gap-3">
+        <button id="btn-generate-credits" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-semibold shadow-md shadow-emerald-600/25 transition-all hover:scale-105 active:scale-95">
+          <span>✨ Auto-Credits</span>
+        </button>
+
+        <a href="projects.html" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors">
+          ← Pipeline
+        </a>
+
+        <!-- Mobile Menu Button -->
+        <button id="btn-mobile-menu" class="md:hidden p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white focus:outline-none" aria-label="Buka Menu">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800/80 bg-slate-950/95 backdrop-blur-xl px-4 py-4 space-y-2">
+      <a href="../index.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Beranda</a>
+      <a href="ideas.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Idea Bank & Upvotes</a>
+      <a href="projects.html" class="block px-3 py-2 rounded-lg text-white font-medium bg-slate-800/60">Pipeline Tracker</a>
+      <a href="collab.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Open Collab Board</a>
+      <a href="assets.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Katalog Aset</a>
+      <a href="gallery.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Galeri Rilis</a>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- BREADCRUMBS -->
+    <nav class="flex items-center gap-2 text-xs text-slate-400">
+      <a href="../index.html" class="hover:text-white transition-colors">Beranda</a>
+      <span>/</span>
+      <a href="projects.html" class="hover:text-white transition-colors">Pipeline</a>
+      <span>/</span>
+      <span class="text-slate-200 font-medium truncate">Detail Proyek & Hub</span>
+    </nav>
+
+    <!-- PROJECT HERO CARD -->
+    <section class="relative overflow-hidden rounded-3xl glass-panel border border-slate-700/80 shadow-2xl p-6 sm:p-8">
+      <div id="proj-detail-cover" class="absolute inset-0 bg-cover bg-center opacity-20 -z-10 filter blur-[2px]"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/60 -z-10"></div>
+
+      <div class="space-y-6 max-w-4xl">
+        <div class="flex flex-wrap items-center gap-3">
+          <span id="proj-detail-badge" class="badge-pipeline badge-animating">
+            MEMUAT...
+          </span>
+          <span class="text-xs text-slate-400">
+            Dibuat: <strong id="proj-detail-date" class="text-slate-200">-</strong>
+          </span>
+          <span class="text-xs text-slate-400">
+            Koordinator: <strong id="proj-detail-coord" class="text-indigo-300">-</strong>
+          </span>
+        </div>
+
+        <div class="space-y-2">
+          <h1 id="proj-detail-title" class="text-3xl sm:text-4xl font-extrabold font-heading text-white tracking-tight leading-tight">
+            Memuat Judul Proyek...
+          </h1>
+          <p id="proj-detail-desc" class="text-sm sm:text-base text-slate-300 leading-relaxed max-w-3xl">
+            Memuat deskripsi proyek...
+          </p>
+        </div>
+
+        <!-- Realtime Progress Bar -->
+        <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-slate-300 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              Progres Produksi Scene Realtime
+            </span>
+            <div class="flex items-center gap-3">
+              <span id="proj-progress-count" class="text-slate-400 font-mono text-[11px]">- scene selesai</span>
+              <span id="proj-progress-text" class="font-mono font-bold text-emerald-400 text-sm">0%</span>
+            </div>
+          </div>
+          <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+            <div id="proj-progress-bar" class="h-full bg-gradient-to-r from-indigo-500 via-sky-400 to-emerald-400 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HUB MODULE NAVIGATION TABS / JUMP LINKS -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none text-xs font-semibold">
+      <a href="#section-scenes" class="px-4 py-2 rounded-xl bg-indigo-600 text-white whitespace-nowrap shadow-md shadow-indigo-600/30">
+        🎬 1. Scene Checklist
+      </a>
+      <a href="#section-relay" class="px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 whitespace-nowrap transition-colors">
+        💻 2. Relay Render Hub
+      </a>
+      <a href="#section-handoff" class="px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 whitespace-nowrap transition-colors">
+        📁 3. Asset Handoff (GDrive)
+      </a>
+      <a href="#section-feedback" class="px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 whitespace-nowrap transition-colors">
+        ⏱️ 4. Timestamp Feedback
+      </a>
+    </div>
+
+    <!-- MAIN TWO-COLUMN CONTENT GRID -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- LEFT COLUMN: CORE WORKFLOW (2 COLS) -->
+      <div class="lg:col-span-2 space-y-12">
+
+        <!-- 1. SCENE CHECKLIST -->
+        <section id="section-scenes" class="space-y-4 scroll-mt-24">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
+            <div>
+              <h2 class="text-xl font-bold font-heading text-white flex items-center gap-2">
+                <span>🎬</span> Scene Checklist (Realtime)
+              </h2>
+              <p class="text-xs text-slate-400">
+                Centang scene selesai untuk meng-update persentase progres animasi seketika.
+              </p>
+            </div>
+
+            <button id="btn-open-add-scene" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all hover:scale-105 active:scale-95 shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              <span>+ Tambah Scene</span>
+            </button>
+          </div>
+
+          <div id="scenes-list-container" class="space-y-3">
+            <div class="glass-card p-5 rounded-2xl skeleton h-20"></div>
+          </div>
+        </section>
+
+        <!-- 2. RELAY RENDER HUB -->
+        <section id="section-relay" class="space-y-4 scroll-mt-24">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
+            <div>
+              <h2 class="text-xl font-bold font-heading text-white flex items-center gap-2">
+                <span>💻</span> Relay Render Hub
+              </h2>
+              <p class="text-xs text-slate-400">
+                Bantu render scene menggunakan PC/laptop spesifikasi tinggi untuk mempercepat produksi.
+              </p>
+            </div>
+
+            <button id="btn-open-add-relay" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-md shadow-purple-600/30 transition-all hover:scale-105 shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              <span>+ Request Bantuan Render</span>
+            </button>
+          </div>
+
+          <div id="relay-list-container" class="space-y-3">
+            <div class="glass-card p-5 rounded-2xl skeleton h-24"></div>
+          </div>
+        </section>
+
+        <!-- 3. ASSET HANDOFF SYSTEM -->
+        <section id="section-handoff" class="space-y-4 scroll-mt-24">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
+            <div>
+              <h2 class="text-xl font-bold font-heading text-white flex items-center gap-2">
+                <span>📁</span> Asset Handoff System (Google Drive)
+              </h2>
+              <p class="text-xs text-slate-400">
+                Pencatatan riwayat serah terima file raw (.blend, rig, texture) antar animator.
+              </p>
+            </div>
+
+            <button id="btn-open-add-handoff" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-all shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              <span>+ Catat Handoff File</span>
+            </button>
+          </div>
+
+          <div id="handoff-list-container" class="space-y-3">
+            <div class="glass-card p-5 rounded-2xl skeleton h-24"></div>
+          </div>
+        </section>
+
+        <!-- 4. TIMESTAMP FEEDBACK REVISION TOOL -->
+        <section id="section-feedback" class="space-y-4 scroll-mt-24">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
+            <div>
+              <h2 class="text-xl font-bold font-heading text-white flex items-center gap-2">
+                <span>⏱️</span> Timestamp Feedback & Revisi
+                <span id="feedback-count-badge" class="px-2 py-0.5 rounded-full bg-slate-800 text-rose-300 text-xs font-mono">0 Selesai</span>
+              </h2>
+              <p class="text-xs text-slate-400">
+                Beri catatan revisi spesifik pada menit:detik tertentu untuk video draft animasi.
+              </p>
+            </div>
+          </div>
+
+          <!-- Add Feedback Form -->
+          <form id="form-add-feedback" class="glass-card p-4 rounded-2xl border border-slate-800 space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+              <div class="space-y-1">
+                <label for="fb-timecode" class="block text-[11px] font-semibold text-slate-400 uppercase">Waktu (mm:ss) <span class="text-rose-400">*</span></label>
+                <input type="text" id="fb-timecode" required placeholder="01:24" 
+                       class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-mono text-white outline-none focus:border-indigo-500" />
+              </div>
+              <div class="space-y-1 sm:col-span-2">
+                <label for="fb-comment" class="block text-[11px] font-semibold text-slate-400 uppercase">Catatan Revisi <span class="text-rose-400">*</span></label>
+                <input type="text" id="fb-comment" required placeholder="Gerakan tangan terlalu kaku, tambah spacing..." 
+                       class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white outline-none focus:border-indigo-500" />
+              </div>
+              <div class="space-y-1">
+                <label for="fb-author" class="block text-[11px] font-semibold text-slate-400 uppercase">Nama Anda</label>
+                <input type="text" id="fb-author" placeholder="Nama Member" 
+                       class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white outline-none focus:border-indigo-500" />
+              </div>
+            </div>
+
+            <div class="flex justify-end pt-1">
+              <button type="submit" id="btn-submit-feedback" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all">
+                + Tambah Catatan Revisi
+              </button>
+            </div>
+          </form>
+
+          <div id="feedback-list-container" class="space-y-2.5">
+            <div class="glass-card p-4 rounded-xl skeleton h-16"></div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- RIGHT COLUMN: SIDEBAR (1 COL) -->
+      <aside class="space-y-6">
+
+        <!-- TEAM MEMBERS -->
+        <div class="glass-panel p-5 rounded-2xl border border-slate-800/80 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-heading font-bold text-sm text-white flex items-center gap-2">
+              <span>👥</span> Tim Kontributor Proyek
+            </h3>
+            <button id="btn-open-add-member" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300">
+              + Tambah
+            </button>
+          </div>
+
+          <div id="members-list-container" class="space-y-2">
+            <div class="glass-card p-3 rounded-xl skeleton h-12"></div>
+            <div class="glass-card p-3 rounded-xl skeleton h-12"></div>
+          </div>
+        </div>
+
+        <!-- AUTO-CREDITS GENERATOR BANNER -->
+        <div class="glass-card p-5 rounded-2xl border border-emerald-500/30 space-y-3 bg-gradient-to-br from-emerald-950/20 via-slate-900 to-teal-950/20">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-lg">
+            📜
+          </div>
+          <h4 class="font-heading font-bold text-sm text-white">Auto-Credits Generator</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Kompilasi otomatis daftar kontributor dari checklist scene, rigger, dan volunteer render menjadi teks kredit penutup siap pakai!
+          </p>
+          <button onclick="document.getElementById('btn-generate-credits').click()" class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors">
+            Buka Rolling Credits →
+          </button>
+        </div>
+
+      </aside>
+
+    </div>
+
+  </main>
+
+  <!-- MODAL: AUTO-CREDITS GENERATOR -->
+  <div id="modal-auto-credits" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md opacity-0 transition-opacity duration-200">
+    <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 sm:p-8 space-y-6 border border-emerald-500/40 shadow-2xl relative">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-xl font-bold font-heading text-white flex items-center gap-2">
+            <span>✨</span> Rolling Credits Generator
+          </h3>
+          <p class="text-xs text-slate-400">Dihasilkan secara otomatis dari data kontributor proyek di database.</p>
+        </div>
+        <button data-close-modal class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+
+      <pre id="credits-output-text" class="p-4 rounded-2xl bg-slate-950 border border-slate-800 font-mono text-xs text-emerald-300 max-h-80 overflow-y-auto whitespace-pre-wrap select-all"></pre>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button type="button" data-close-modal class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors">
+          Tutup
+        </button>
+        <button id="btn-copy-credits" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-lg shadow-emerald-600/30 transition-all hover:scale-105 flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+          <span>Salin ke Clipboard</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: TAMBAH SCENE -->
+  <div id="modal-add-scene" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md opacity-0 transition-opacity duration-200">
+    <div class="glass-panel w-full max-w-md rounded-3xl p-6 space-y-5 border border-slate-700/80 shadow-2xl relative">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold font-heading text-white">Tambah Scene Baru</h3>
+        <button data-close-modal class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+
+      <form id="form-add-scene" class="space-y-4">
+        <div class="grid grid-cols-3 gap-3">
+          <div class="space-y-1">
+            <label for="scene-no" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">No Scene</label>
+            <input type="number" id="scene-no" min="1" placeholder="1" 
+                   class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 focus:border-indigo-500 text-sm text-white outline-none" />
+          </div>
+          <div class="col-span-2 space-y-1">
+            <label for="scene-title" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Judul Scene <span class="text-rose-400">*</span></label>
+            <input type="text" id="scene-title" required placeholder="Contoh: Rooftop Battle Sequence" 
+                   class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 focus:border-indigo-500 text-sm text-white outline-none" />
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label for="scene-assignee" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Assignee / Animator</label>
+          <input type="text" id="scene-assignee" placeholder="Contoh: Bayu (Lead Animator)" 
+                 class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 focus:border-indigo-500 text-sm text-white outline-none" />
+        </div>
+
+        <div class="space-y-1">
+          <label for="scene-notes" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Catatan Teknis / Instruksi</label>
+          <textarea id="scene-notes" rows="2" placeholder="Durasi perkiraan 4 detik..." 
+                    class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 focus:border-indigo-500 text-sm text-white outline-none"></textarea>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-3">
+          <button type="button" data-close-modal class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors">Batal</button>
+          <button type="submit" id="btn-submit-scene" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold">Simpan Scene</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REQUEST RELAY RENDER -->
+  <div id="modal-add-relay" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md opacity-0 transition-opacity duration-200">
+    <div class="glass-panel w-full max-w-md rounded-3xl p-6 space-y-5 border border-purple-500/40 shadow-2xl relative">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold font-heading text-white">Minta Bantuan Render Relay</h3>
+        <button data-close-modal class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+
+      <form id="form-add-relay" class="space-y-4">
+        <div class="space-y-1">
+          <label for="relay-scene-title" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Scene yang Membutuhkan Render <span class="text-rose-400">*</span></label>
+          <input type="text" id="relay-scene-title" required placeholder="Contoh: Scene 3 (Drone Chase Explosion)" 
+                 class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 focus:border-purple-500 text-sm text-white outline-none" />
+        </div>
+
+        <div class="space-y-1">
+          <label for="relay-specs" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Spesifikasi Software & Render Engine <span class="text-rose-400">*</span></label>
+          <input type="text" id="relay-specs" required placeholder="Contoh: Blender 4.2 Cycles GPU (Min RTX 3060), 1080p 60fps" 
+                 class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 focus:border-purple-500 text-sm text-white outline-none" />
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-3">
+          <button type="button" data-close-modal class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">Batal</button>
+          <button type="submit" id="btn-submit-relay" class="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-md shadow-purple-600/30">Kirim Permintaan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CATAT HANDOFF FILE -->
+  <div id="modal-add-handoff" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md opacity-0 transition-opacity duration-200">
+    <div class="glass-panel w-full max-w-md rounded-3xl p-6 space-y-5 border border-slate-700/80 shadow-2xl relative">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold font-heading text-white">Catat Serah Terima File Raw</h3>
+        <button data-close-modal class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+
+      <form id="form-add-handoff" class="space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label for="handoff-from" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Pengirim <span class="text-rose-400">*</span></label>
+            <input type="text" id="handoff-from" required placeholder="Nama Anda" 
+                   class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 focus:border-indigo-500 text-xs text-white outline-none" />
+          </div>
+          <div class="space-y-1">
+            <label for="handoff-to" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Penerima <span class="text-rose-400">*</span></label>
+            <input type="text" id="handoff-to" required placeholder="Nama Penerima" 
+                   class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 focus:border-indigo-500 text-xs text-white outline-none" />
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label for="handoff-gdrive" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Link Google Drive <span class="text-rose-400">*</span></label>
+          <input type="url" id="handoff-gdrive" required placeholder="https://drive.google.com/..." 
+                 class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 focus:border-indigo-500 text-xs text-white outline-none" />
+          <p class="text-[10px] text-amber-400 pt-0.5">⚠️ Pastikan akses link diatur ke "Anyone with the link".</p>
+        </div>
+
+        <div class="space-y-1">
+          <label for="handoff-note" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Catatan Format / Versi</label>
+          <input type="text" id="handoff-note" placeholder="Contoh: File rig v2 sudah diberi controller jari" 
+                 class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 focus:border-indigo-500 text-xs text-white outline-none" />
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-3">
+          <button type="button" data-close-modal class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">Batal</button>
+          <button type="submit" id="btn-submit-handoff" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold">Simpan Handoff</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: TAMBAH ANGGOTA TIM -->
+  <div id="modal-add-member" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md opacity-0 transition-opacity duration-200">
+    <div class="glass-panel w-full max-w-md rounded-3xl p-6 space-y-5 border border-slate-700/80 shadow-2xl relative">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold font-heading text-white">Tambah Anggota Tim</h3>
+        <button data-close-modal class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+
+      <form id="form-add-member" class="space-y-4">
+        <div class="space-y-1">
+          <label for="member-name" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Nama Kontributor <span class="text-rose-400">*</span></label>
+          <input type="text" id="member-name" required placeholder="Contoh: Dimas Pratama" 
+                 class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 focus:border-indigo-500 text-sm text-white outline-none" />
+        </div>
+
+        <div class="space-y-1">
+          <label for="member-role" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Peran / Divisi <span class="text-rose-400">*</span></label>
+          <select id="member-role" required class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 focus:border-indigo-500 text-sm text-white outline-none">
+            <option value="Lead Animator">Lead Animator</option>
+            <option value="Animator">Animator</option>
+            <option value="Rigger">Rigger 3D</option>
+            <option value="Storyboard Artist">Storyboard Artist</option>
+            <option value="Environment Artist">Environment Artist</option>
+            <option value="Audio / SFX">Audio & Sound FX</option>
+            <option value="Render Volunteer">Render Volunteer</option>
+            <option value="Editor">Editor / Compositor</option>
+          </select>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-3">
+          <button type="button" data-close-modal class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">Batal</button>
+          <button type="submit" id="btn-submit-member" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold">Tambahkan Anggota</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- UNIVERSAL FOOTER -->
+  <footer class="border-t border-slate-800/80 bg-slate-950 py-10 mt-16 text-slate-400 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        <span class="font-heading font-bold text-white text-sm">Community Animation Hub</span> &copy; 2026. Modul Scene Checklist & Collaboration Hub.
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="../index.html" class="hover:text-white transition-colors">Beranda</a>
+        <a href="projects.html" class="hover:text-white transition-colors">Pipeline</a>
+        <a href="collab.html" class="hover:text-white transition-colors">Kolaborasi</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-[9999] flex flex-col gap-2.5 pointer-events-none max-w-sm w-full px-4"></div>
+
+  <!-- Page Entry Script -->
+  <script type="module">
+    import { initProjectDetailPage } from '../src/js/modules/scenes.js';
+    import { $ } from '../src/js/utils/dom.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Mobile menu toggle
+      const btn = $('#btn-mobile-menu');
+      const menu = $('#mobile-menu');
+      if (btn && menu) {
+        btn.addEventListener('click', () => menu.classList.toggle('hidden'));
+      }
+
+      initProjectDetailPage();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galeri Karya Rilis - Community Animation Hub</title>
+  <meta name="description" content="Showcase karya animasi komunitas yang telah 100% selesai dan dirilis. Tonton video animasi, short film, dan apresiasi kontribusi seluruh tim.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="../src/css/custom.css">
+
+  <!-- Supabase JS Client via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-[#090d16] text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Ambient Glow Backgrounds -->
+  <div class="fixed top-0 right-1/4 w-96 h-96 bg-purple-600/10 glow-primary -z-10"></div>
+  <div class="fixed bottom-10 left-10 w-96 h-96 bg-indigo-600/10 glow-primary -z-10"></div>
+
+  <!-- NAVIGATION BAR -->
+  <header class="sticky top-0 z-50 glass-panel border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="../index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 p-0.5 shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+            <svg class="w-5 h-5 text-indigo-400 group-hover:text-indigo-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </div>
+        </div>
+        <div>
+          <span class="font-heading font-extrabold text-lg tracking-tight text-white group-hover:text-indigo-300 transition-colors">AnimHub<span class="text-indigo-400">.</span></span>
+          <span class="hidden sm:inline-block text-[10px] uppercase tracking-wider px-2 py-0.5 ml-2 bg-indigo-500/10 text-indigo-300 rounded-full border border-indigo-500/20 font-semibold">Community Studio</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav class="hidden md:flex items-center gap-1 text-sm font-medium text-slate-300">
+        <a href="../index.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Beranda</a>
+        <a href="ideas.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Idea Bank</a>
+        <a href="projects.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Pipeline</a>
+        <a href="collab.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Kolaborasi</a>
+        <a href="assets.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Katalog Aset</a>
+        <a href="gallery.html" class="px-3.5 py-1.5 rounded-lg text-white bg-slate-800/80 transition-colors">Galeri</a>
+      </nav>
+
+      <!-- Action Button -->
+      <div class="flex items-center gap-3">
+        <a href="projects.html" class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all">
+          <span>Pantau Pipeline Proyek →</span>
+        </a>
+
+        <!-- Mobile Menu Button -->
+        <button id="btn-mobile-menu" class="md:hidden p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white focus:outline-none" aria-label="Buka Menu">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800/80 bg-slate-950/95 backdrop-blur-xl px-4 py-4 space-y-2">
+      <a href="../index.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Beranda</a>
+      <a href="ideas.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Idea Bank & Upvotes</a>
+      <a href="projects.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Pipeline Tracker</a>
+      <a href="collab.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Open Collab Board</a>
+      <a href="assets.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Katalog Aset</a>
+      <a href="gallery.html" class="block px-3 py-2 rounded-lg text-white font-medium bg-slate-800/60">Galeri Rilis</a>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- HEADER TITLE & SEARCH -->
+    <section class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
+      <div class="space-y-1">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>Modul 4: Etalase Karya Selesai</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold font-heading text-white tracking-tight flex items-center gap-3">
+          Finished Works Gallery
+          <span id="gallery-count-badge" class="px-2.5 py-0.5 rounded-full bg-slate-800 text-indigo-400 text-xs font-mono font-semibold">
+            Memuat...
+          </span>
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-400 max-w-xl">
+          Kumpulan karya animasi yang telah mencapai 100% selesai dan dirilis resmi oleh komunitas.
+        </p>
+      </div>
+
+      <!-- Search Input -->
+      <div class="relative w-full md:w-80 shrink-0">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+        <input type="text" id="search-gallery" placeholder="Cari judul karya atau tim kontributor..." 
+               class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700/80 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-xs text-white placeholder-slate-500 outline-none transition-all" />
+      </div>
+    </section>
+
+    <!-- GALLERY GRID CONTAINER -->
+    <section id="gallery-grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Rendered dynamically by gallery.js -->
+      <div class="glass-card p-6 rounded-3xl skeleton h-72"></div>
+      <div class="glass-card p-6 rounded-3xl skeleton h-72"></div>
+      <div class="glass-card p-6 rounded-3xl skeleton h-72"></div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: VIDEO PLAYER & CREDITS POPOVER -->
+  <div id="modal-video-player" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md opacity-0 transition-opacity duration-200">
+    <div class="glass-panel w-full max-w-4xl rounded-3xl overflow-hidden border border-slate-700/80 shadow-2xl relative space-y-4">
+      
+      <!-- Video Player Frame (16:9) -->
+      <div class="relative aspect-video w-full bg-black">
+        <iframe id="player-iframe" class="w-full h-full" src="" title="Video Player" frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen></iframe>
+      </div>
+
+      <!-- Video Details & Credits Section -->
+      <div class="p-6 pt-0 space-y-4">
+        <div class="flex items-start justify-between gap-4">
+          <div class="space-y-1">
+            <h3 id="modal-player-title" class="text-xl font-bold font-heading text-white">Judul Animasi</h3>
+            <p id="modal-player-credits" class="text-xs text-slate-300 leading-relaxed max-w-2xl font-mono">
+              Credits kontributor...
+            </p>
+          </div>
+          <button data-close-modal class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors shrink-0">
+            ✕ Tutup Player
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- UNIVERSAL FOOTER -->
+  <footer class="border-t border-slate-800/80 bg-slate-950 py-10 mt-16 text-slate-400 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        <span class="font-heading font-bold text-white text-sm">Community Animation Hub</span> &copy; 2026. Modul Showcase Galeri Rilis.
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="../index.html" class="hover:text-white transition-colors">Beranda</a>
+        <a href="projects.html" class="hover:text-white transition-colors">Pipeline</a>
+        <a href="assets.html" class="hover:text-white transition-colors">Katalog Aset</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Page Entry Script -->
+  <script type="module">
+    import { initGalleryPage } from '../src/js/modules/gallery.js';
+    import { $ } from '../src/js/utils/dom.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Mobile menu toggle
+      const btn = $('#btn-mobile-menu');
+      const menu = $('#mobile-menu');
+      if (btn && menu) {
+        btn.addEventListener('click', () => menu.classList.toggle('hidden'));
+      }
+
+      initGalleryPage();
+    });
+  </script>
+</body>
+</html>

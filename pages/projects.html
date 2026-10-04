@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="id" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pipeline Status Tracker - Community Animation Hub</title>
+  <meta name="description" content="Pantau status produksi animasi komunitas secara realtime melalui Kanban Board: Idea, Storyboard, Animating, Render Relay, Review, hingga Selesai.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="../src/css/custom.css">
+
+  <!-- Supabase JS Client via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-[#090d16] text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Ambient Glow Backgrounds -->
+  <div class="fixed top-0 left-1/3 w-96 h-96 bg-indigo-600/10 glow-primary -z-10"></div>
+  <div class="fixed bottom-10 right-10 w-96 h-96 bg-purple-600/10 glow-primary -z-10"></div>
+
+  <!-- NAVIGATION BAR -->
+  <header class="sticky top-0 z-50 glass-panel border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="../index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 p-0.5 shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+            <svg class="w-5 h-5 text-indigo-400 group-hover:text-indigo-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </div>
+        </div>
+        <div>
+          <span class="font-heading font-extrabold text-lg tracking-tight text-white group-hover:text-indigo-300 transition-colors">AnimHub<span class="text-indigo-400">.</span></span>
+          <span class="hidden sm:inline-block text-[10px] uppercase tracking-wider px-2 py-0.5 ml-2 bg-indigo-500/10 text-indigo-300 rounded-full border border-indigo-500/20 font-semibold">Community Studio</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav class="hidden md:flex items-center gap-1 text-sm font-medium text-slate-300">
+        <a href="../index.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Beranda</a>
+        <a href="ideas.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Idea Bank</a>
+        <a href="projects.html" class="px-3.5 py-1.5 rounded-lg text-white bg-slate-800/80 transition-colors">Pipeline</a>
+        <a href="collab.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Kolaborasi</a>
+        <a href="assets.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Katalog Aset</a>
+        <a href="gallery.html" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition-colors">Galeri</a>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3">
+        <button id="btn-open-create-project" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-xs font-semibold shadow-md shadow-indigo-500/25 transition-all duration-200 hover:scale-105 active:scale-95">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          <span>+ Buat Proyek</span>
+        </button>
+
+        <!-- Mobile Menu Button -->
+        <button id="btn-mobile-menu" class="md:hidden p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white focus:outline-none" aria-label="Buka Menu">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800/80 bg-slate-950/95 backdrop-blur-xl px-4 py-4 space-y-2">
+      <a href="../index.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Beranda</a>
+      <a href="ideas.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Idea Bank & Upvotes</a>
+      <a href="projects.html" class="block px-3 py-2 rounded-lg text-white font-medium bg-slate-800/60">Pipeline Tracker</a>
+      <a href="collab.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Open Collab Board</a>
+      <a href="assets.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Katalog Aset</a>
+      <a href="gallery.html" class="block px-3 py-2 rounded-lg text-slate-300 font-medium hover:bg-slate-800/40">Galeri Rilis</a>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER (FULL WIDTH FOR KANBAN) -->
+  <main class="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- HEADER TITLE & SEARCH -->
+    <section class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
+      <div class="space-y-1">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Modul 2: Realtime Production Pipeline</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold font-heading text-white tracking-tight">
+          Pipeline Status Tracker
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-400 max-w-xl">
+          Kanban interaktif realtime dari tahap konsep hingga rilis. Status proyek berpindah secara otomatis di seluruh layar anggota.
+        </p>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="relative w-full md:w-80 shrink-0">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+        <input type="text" id="search-pipeline" placeholder="Cari judul proyek atau koordinator..." 
+               class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700/80 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-xs text-white placeholder-slate-500 outline-none transition-all" />
+      </div>
+    </section>
+
+    <!-- KANBAN BOARD CONTAINER (6 COLUMNS) -->
+    <section id="kanban-board" class="overflow-x-auto pb-6 scrollbar-thin">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5 min-w-[1280px] xl:min-w-0">
+
+        <!-- Column 1: IDEA -->
+        <div class="flex flex-col rounded-2xl bg-slate-950/60 border border-slate-800/80 p-3.5 space-y-3">
+          <div class="flex items-center justify-between px-1">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+              <h3 class="font-heading font-bold text-xs uppercase tracking-wider text-slate-200">1. Idea</h3>
+            </div>
+            <span id="column-count-idea" class="px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 font-mono text-[11px] font-bold text-slate-400">0</span>
+          </div>
+          <div id="column-list-idea" class="space-y-3 flex-1 min-h-[300px]">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Column 2: STORYBOARD -->
+        <div class="flex flex-col rounded-2xl bg-slate-950/60 border border-slate-800/80 p-3.5 space-y-3">
+          <div class="flex items-center justify-between px-1">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+              <h3 class="font-heading font-bold text-xs uppercase tracking-wider text-sky-300">2. Storyboard</h3>
+            </div>
+            <span id="column-count-storyboard" class="px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 font-mono text-[11px] font-bold text-sky-400">0</span>
+          </div>
+          <div id="column-list-storyboard" class="space-y-3 flex-1 min-h-[300px]">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Column 3: ANIMATING -->
+        <div class="flex flex-col rounded-2xl bg-slate-950/60 border border-slate-800/80 p-3.5 space-y-3">
+          <div class="flex items-center justify-between px-1">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <h3 class="font-heading font-bold text-xs uppercase tracking-wider text-amber-300">3. Animating</h3>
+            </div>
+            <span id="column-count-animating" class="px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 font-mono text-[11px] font-bold text-amber-400">0</span>
+          </div>
+          <div id="column-list-animating" class="space-y-3 flex-1 min-h-[300px]">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Column 4: RENDER -->
+        <div class="flex flex-col rounded-2xl bg-slate-950/60 border border-slate-800/80 p-3.5 space-y-3">
+          <div class="flex items-center justify-between px-1">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span>
+              <h3 class="font-heading font-bold text-xs uppercase tracking-wider text-purple-300">4. Render Relay</h3>
+            </div>
+            <span id="column-count-render" class="px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 font-mono text-[11px] font-bold text-purple-400">0</span>
+          </div>
+          <div id="column-list-render" class="space-y-3 flex-1 min-h-[300px]">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Column 5: REVIEW -->
+        <div class="flex flex-col rounded-2xl bg-slate-950/60 border border-slate-800/80 p-3.5 space-y-3">
+          <div class="flex items-center justify-between px-1">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span>
+              <h3 class="font-heading font-bold text-xs uppercase tracking-wider text-rose-300">5. Review</h3>
+            </div>
+            <span id="column-count-review" class="px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 font-mono text-[11px] font-bold text-rose-400">0</span>
+          </div>
+          <div id="column-list-review" class="space-y-3 flex-1 min-h-[300px]">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Column 6: DONE -->
+        <div class="flex flex-col rounded-2xl bg-slate-950/60 border border-slate-800/80 p-3.5 space-y-3">
+          <div class="flex items-center justify-between px-1">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <h3 class="font-heading font-bold text-xs uppercase tracking-wider text-emerald-300">6. Released / Done</h3>
+            </div>
+            <span id="column-count-done" class="px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 font-mono text-[11px] font-bold text-emerald-400">0</span>
+          </div>
+          <div id="column-list-done" class="space-y-3 flex-1 min-h-[300px]">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: BUAT PROYEK BARU -->
+  <div id="modal-create-project" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md opacity-0 transition-opacity duration-200">
+    <div class="glass-panel w-full max-w-lg rounded-3xl p-6 sm:p-8 space-y-6 border border-slate-700/80 shadow-2xl relative">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-bold font-heading text-white">Tambah Proyek Baru ke Pipeline</h3>
+        <button data-close-modal class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+
+      <form id="form-create-project" class="space-y-4">
+        <div class="space-y-1.5">
+          <label for="new-proj-title" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Judul Proyek <span class="text-rose-400">*</span></label>
+          <input type="text" id="new-proj-title" required placeholder="Contoh: Pendekar Cybernetic: Episode 1" 
+                 class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 focus:border-indigo-500 text-sm text-white outline-none" />
+        </div>
+
+        <div class="space-y-1.5">
+          <label for="new-proj-desc" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Deskripsi Singkat</label>
+          <textarea id="new-proj-desc" rows="2" placeholder="Jelaskan gambaran proyek animasi ini..." 
+                    class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 focus:border-indigo-500 text-sm text-white outline-none"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="space-y-1.5">
+            <label for="new-proj-status" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Tahap Awal</label>
+            <select id="new-proj-status" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 focus:border-indigo-500 text-sm text-white outline-none">
+              <option value="idea">Idea (Ide Cerita)</option>
+              <option value="storyboard">Storyboard</option>
+              <option value="animating">Animating</option>
+              <option value="render">Render Relay</option>
+            </select>
+          </div>
+
+          <div class="space-y-1.5">
+            <label for="new-proj-coordinator" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Nama Koordinator</label>
+            <input type="text" id="new-proj-coordinator" placeholder="Nama Anda / Studio" 
+                   class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 focus:border-indigo-500 text-sm text-white outline-none" />
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <label for="new-proj-cover" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">URL Cover Thumbnail (Opsional)</label>
+          <input type="url" id="new-proj-cover" placeholder="https://example.com/cover.jpg" 
+                 class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 focus:border-indigo-500 text-sm text-white outline-none" />
+        </div>
+
+        <div class="pt-4 flex items-center justify-end gap-3">
+          <button type="button" data-close-modal class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors">
+            Batal
+          </button>
+          <button type="submit" id="btn-submit-new-project" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30 transition-all hover:scale-105">
+            Simpan Proyek
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: UBAH STATUS PROYEK -->
+  <div id="modal-change-status" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md opacity-0 transition-opacity duration-200">
+    <div class="glass-panel w-full max-w-md rounded-3xl p-6 space-y-5 border border-slate-700/80 shadow-2xl relative">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold font-heading text-white">Ubah Tahap Pipeline</h3>
+        <button data-close-modal class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+
+      <p class="text-xs text-slate-400 leading-relaxed">
+        Pindahkan tahap proyek <strong id="change-status-proj-title" class="text-white">Proyek</strong> ke tahap berikutnya:
+      </p>
+
+      <form id="form-change-status" class="space-y-4">
+        <div class="space-y-1.5">
+          <label for="change-status-select" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Tahap Baru</label>
+          <select id="change-status-select" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 focus:border-indigo-500 text-sm text-white outline-none">
+            <option value="idea">1. Idea (Ide Cerita)</option>
+            <option value="storyboard">2. Storyboard & Konsep</option>
+            <option value="animating">3. Animating (Produksi)</option>
+            <option value="render">4. Render Relay & FX</option>
+            <option value="review">5. Review & Revisi</option>
+            <option value="done">6. Released / Done</option>
+          </select>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-3">
+          <button type="button" data-close-modal class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors">
+            Batal
+          </button>
+          <button type="submit" id="btn-submit-change-status" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all hover:scale-105">
+            Pindahkan Tahap
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- UNIVERSAL FOOTER -->
+  <footer class="border-t border-slate-800/80 bg-slate-950 py-10 mt-16 text-slate-400 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        <span class="font-heading font-bold text-white text-sm">Community Animation Hub</span> &copy; 2026. Modul Pipeline Tracker.
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="../index.html" class="hover:text-white transition-colors">Beranda</a>
+        <a href="ideas.html" class="hover:text-white transition-colors">Idea Bank</a>
+        <a href="collab.html" class="hover:text-white transition-colors">Kolaborasi</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-[9999] flex flex-col gap-2.5 pointer-events-none max-w-sm w-full px-4"></div>
+
+  <!-- Page Entry Script -->
+  <script type="module">
+    import { initPipelinePage } from '../src/js/modules/pipeline.js';
+    import { $ } from '../src/js/utils/dom.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Mobile menu toggle
+      const btn = $('#btn-mobile-menu');
+      const menu = $('#mobile-menu');
+      if (btn && menu) {
+        btn.addEventListener('click', () => menu.classList.toggle('hidden'));
+      }
+
+      initPipelinePage();
+    });
+  </script>
+</body>
+</html>
